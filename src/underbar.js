@@ -267,12 +267,10 @@
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
-    const keyFrequency = {};
     for (let i = 1; i < arguments.length; i++) {
       for (let [key, value] of Object.entries(arguments[i])) {
-        if (!keyFrequency[key]) {
+        if (obj[key] === undefined) {
           obj[key] = value;
-          keyFrequency[key] = value;
         }
       }
     }
@@ -320,6 +318,20 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    // Store function data
+
+    const functionData = {};
+    // function to handle function arguments
+    return function() {
+      // grab only the two parameter passed into function, not whole arguments object
+      const args = JSON.stringify(arguments);
+      // check if arguments have been computed
+      if (!(args in functionData)) {
+        // compute arguments
+        functionData[args] = func.apply(this, arguments);
+      }
+      return functionData[args];
+    };
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -329,6 +341,10 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    var args = Array.prototype.slice.call(arguments, 2);
+    setTimeout(function() {
+      func.apply(this, args);
+    }, wait);
   };
 
 
@@ -343,6 +359,13 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+    const rand = [];
+    const copy = array.slice(0, array.length);
+    for (let i = 0; i < array.length; i++) {
+      let random = Math.floor(Math.random() * copy.length);
+      rand.push(copy.splice(random, 1)[0]);
+    }
+    return rand;
   };
 
 
